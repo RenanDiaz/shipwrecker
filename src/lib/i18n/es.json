@@ -1,0 +1,58 @@
+{
+	"app": {
+		"title": "ShipWrecker",
+		"description": "Un juego multijugador de combate naval"
+	},
+	"landing": {
+		"createGame": "Crear Partida",
+		"joinGame": "Unirse a Partida",
+		"enterRoomId": "Ingresa el ID de la Sala",
+		"join": "Unirse",
+		"instructions": "Instrucciones",
+		"howToPlay": "Cómo Jugar",
+		"step1": "Crea una partida o ingresa un ID de sala para unirte",
+		"step2": "Coloca tus barcos en tu tablero",
+		"step3": "Tomen turnos disparando a la cuadrícula del oponente",
+		"step4": "¡El primero en hundir todos los barcos enemigos gana!"
+	},
+	"game": {
+		"yourBoard": "Tu Tablero",
+		"opponentBoard": "Tablero del Oponente",
+		"placeYourShips": "Coloca Tus Barcos",
+		"waitingForOpponent": "Esperando al Oponente...",
+		"yourTurn": "Tu Turno",
+		"opponentTurn": "Turno del Oponente",
+		"fire": "¡Fuego!",
+		"hit": "¡Tocado!",
+		"miss": "¡Agua!",
+		"shipSunk": "¡Barco Hundido!",
+		"youWin": "¡Ganaste!",
+		"youLose": "¡Perdiste!",
+		"playAgain": "Jugar de Nuevo",
+		"copyRoomLink": "Copiar Enlace de Sala",
+		"linkCopied": "¡Enlace Copiado!",
+		"roomId": "ID de Sala",
+		"ready": "Listo",
+		"waitingForReady": "Esperando a que el oponente esté listo...",
+		"youAreReady": "¡Estás listo! Esperando al oponente...",
+		"rotate": "Rotar",
+		"removeShip": "Quitar Barco",
+		"allShipsPlaced": "¡Todos los barcos colocados!",
+		"placeNextShip": "Coloca tu {ship}",
+		"opponentDisconnected": "Oponente desconectado",
+		"connecting": "Conectando...",
+		"rematchRequested": "Revancha solicitada...",
+		"opponentWantsRematch": "¡El oponente quiere revancha!"
+	},
+	"ships": {
+		"carrier": "Portaaviones",
+		"battleship": "Acorazado",
+		"cruiser": "Crucero",
+		"submarine": "Submarino",
+		"destroyer": "Destructor"
+	},
+	"language": {
+		"en": "English",
+		"es": "Español"
+	}
+}

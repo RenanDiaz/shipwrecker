@@ -1,0 +1,58 @@
+{
+	"app": {
+		"title": "ShipWrecker",
+		"description": "A multiplayer naval combat game"
+	},
+	"landing": {
+		"createGame": "Create Game",
+		"joinGame": "Join Game",
+		"enterRoomId": "Enter Room ID",
+		"join": "Join",
+		"instructions": "Instructions",
+		"howToPlay": "How to Play",
+		"step1": "Create a game or enter a room ID to join",
+		"step2": "Place your ships on your board",
+		"step3": "Take turns firing at your opponent's grid",
+		"step4": "First to sink all enemy ships wins!"
+	},
+	"game": {
+		"yourBoard": "Your Board",
+		"opponentBoard": "Opponent's Board",
+		"placeYourShips": "Place Your Ships",
+		"waitingForOpponent": "Waiting for Opponent...",
+		"yourTurn": "Your Turn",
+		"opponentTurn": "Opponent's Turn",
+		"fire": "Fire!",
+		"hit": "Hit!",
+		"miss": "Miss!",
+		"shipSunk": "Ship Sunk!",
+		"youWin": "You Win!",
+		"youLose": "You Lose!",
+		"playAgain": "Play Again",
+		"copyRoomLink": "Copy Room Link",
+		"linkCopied": "Link Copied!",
+		"roomId": "Room ID",
+		"ready": "Ready",
+		"waitingForReady": "Waiting for opponent to be ready...",
+		"youAreReady": "You're ready! Waiting for opponent...",
+		"rotate": "Rotate",
+		"removeShip": "Remove Ship",
+		"allShipsPlaced": "All ships placed!",
+		"placeNextShip": "Place your {ship}",
+		"opponentDisconnected": "Opponent disconnected",
+		"connecting": "Connecting...",
+		"rematchRequested": "Rematch requested...",
+		"opponentWantsRematch": "Opponent wants a rematch!"
+	},
+	"ships": {
+		"carrier": "Carrier",
+		"battleship": "Battleship",
+		"cruiser": "Cruiser",
+		"submarine": "Submarine",
+		"destroyer": "Destroyer"
+	},
+	"language": {
+		"en": "English",
+		"es": "Español"
+	}
+}
