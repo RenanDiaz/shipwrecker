@@ -85,16 +85,16 @@
 	}
 </script>
 
-<div class="bg-navy-800/50 rounded-lg p-4 w-full max-w-xs">
-	<h3 class="text-lg font-semibold text-white mb-3">{$_('game.placeYourShips')}</h3>
+<div class="bg-navy-800/50 rounded-lg p-3 sm:p-4 w-full max-w-xs mx-auto">
+	<h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">{$_('game.placeYourShips')}</h3>
 
 	<!-- Ship list -->
-	<div class="space-y-2 mb-4">
+	<div class="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
 		{#each SHIP_TYPES as type}
 			{@const isPlaced = placedShipTypes.has(type)}
 			{@const isSelected = selectedShipType === type}
-			<div class="flex items-center gap-2">
-				<div class="flex-1">
+			<div class="flex items-center gap-1.5 sm:gap-2">
+				<div class="flex-1 min-w-0">
 					<ShipComponent
 						shipType={type}
 						{isPlaced}
@@ -105,7 +105,7 @@
 				{#if isPlaced}
 					<button
 						type="button"
-						class="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded bg-red-900/30 hover:bg-red-900/50"
+						class="text-[10px] sm:text-xs text-red-400 hover:text-red-300 active:text-red-200 px-1.5 sm:px-2 py-1 sm:py-1.5 rounded bg-red-900/30 hover:bg-red-900/50 active:bg-red-900/70 touch-manipulation flex-shrink-0"
 						onclick={() => handleRemoveShip(type)}
 					>
 						{$_('game.removeShip')}
@@ -117,27 +117,27 @@
 
 	<!-- Orientation toggle -->
 	{#if selectedShipType}
-		<div class="mb-4">
+		<div class="mb-3 sm:mb-4">
 			<button
 				type="button"
-				class="w-full py-2 px-4 bg-ocean-600 hover:bg-ocean-500 text-white rounded-lg transition-colors"
+				class="w-full py-2.5 sm:py-2 px-4 bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
 				onclick={toggleOrientation}
 			>
 				{$_('game.rotate')} ({orientation === 'horizontal' ? '↔' : '↕'})
 			</button>
 		</div>
-		<p class="text-sm text-ocean-300 text-center">
+		<p class="text-xs sm:text-sm text-ocean-300 text-center">
 			{$_('game.placeNextShip', { values: { ship: $_(`ships.${selectedShipType}`) } })}
 		</p>
 	{/if}
 
 	<!-- Ready button -->
 	{#if allShipsPlaced}
-		<div class="mt-4">
-			<p class="text-sm text-green-400 text-center mb-2">{$_('game.allShipsPlaced')}</p>
+		<div class="mt-3 sm:mt-4">
+			<p class="text-xs sm:text-sm text-green-400 text-center mb-2">{$_('game.allShipsPlaced')}</p>
 			<button
 				type="button"
-				class="w-full py-3 px-4 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition-colors"
+				class="w-full py-3 sm:py-3 px-4 bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-semibold rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
 				onclick={onReady}
 			>
 				{$_('game.ready')}

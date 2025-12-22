@@ -49,15 +49,15 @@
 	}
 </script>
 
-<div class="flex flex-col items-center">
-	<h3 class="text-lg font-semibold text-white mb-2">{title}</h3>
+<div class="flex flex-col items-center w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto">
+	<h3 class="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">{title}</h3>
 
-	<div class="bg-navy-900/50 p-2 rounded-lg shadow-lg">
+	<div class="bg-navy-900/50 p-1.5 sm:p-2 rounded-lg shadow-lg w-full">
 		<!-- Column labels -->
-		<div class="flex">
-			<div class="w-6 h-6"></div>
+		<div class="flex justify-center">
+			<div class="w-5 sm:w-6 h-5 sm:h-6 flex-shrink-0"></div>
 			{#each COLUMN_LABELS as label}
-				<div class="w-8 h-6 sm:w-9 md:w-10 flex items-center justify-center text-xs text-ocean-300 font-medium">
+				<div class="board-cell-label flex items-center justify-center text-[10px] sm:text-xs text-ocean-300 font-medium">
 					{label}
 				</div>
 			{/each}
@@ -65,9 +65,9 @@
 
 		<!-- Board grid -->
 		{#each Array(BOARD_SIZE) as _, row}
-			<div class="flex">
+			<div class="flex justify-center">
 				<!-- Row label -->
-				<div class="w-6 h-8 sm:h-9 md:h-10 flex items-center justify-center text-xs text-ocean-300 font-medium">
+				<div class="w-5 sm:w-6 board-cell-height flex items-center justify-center text-[10px] sm:text-xs text-ocean-300 font-medium flex-shrink-0">
 					{ROW_LABELS[row]}
 				</div>
 

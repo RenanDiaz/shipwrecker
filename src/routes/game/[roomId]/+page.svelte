@@ -133,7 +133,7 @@
 	);
 </script>
 
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pb-4">
 	{#if !connectionState.connected}
 		<!-- Loading state -->
 		<div class="flex items-center justify-center min-h-[400px]">
@@ -155,7 +155,7 @@
 		</div>
 	{:else if gameState}
 		<!-- Game status bar -->
-		<div class="mb-6">
+		<div class="mb-3 sm:mb-6">
 			<GameStatus
 				phase={gameState.phase}
 				yourShips={yourBoard?.ships ?? []}
@@ -170,10 +170,38 @@
 			/>
 		</div>
 
-		<!-- Main game area -->
-		<div class="flex flex-col lg:flex-row gap-6 items-start justify-center">
-			<!-- Your board -->
-			<div class="flex flex-col items-center gap-4">
+		<!-- Main game area - mobile first: opponent at top, you at bottom -->
+		<div class="flex flex-col gap-4 sm:gap-6 items-center justify-center">
+			<!-- Opponent board (always at top - like real Battleship) -->
+			<div class="flex flex-col items-center gap-2 sm:gap-4 w-full">
+				{#if opponentBoard}
+					<Board
+						board={opponentBoard}
+						title={$_('game.opponentBoard')}
+						isOpponentBoard={true}
+						isClickable={isPlayingPhase && isYourTurn}
+						previewCoords={selectedTarget ? [selectedTarget] : []}
+						isValidPreview={true}
+						lastShotCoord={lastShotCoordForOpponentBoard}
+						onCellClick={handleOpponentBoardClick}
+					/>
+				{/if}
+			</div>
+
+			<!-- Game controls (between boards on mobile) -->
+			{#if isPlayingPhase}
+				<div class="flex flex-col items-center gap-2 w-full max-w-xs px-4">
+					<GameControls
+						{isYourTurn}
+						{selectedTarget}
+						{canFire}
+						onFire={handleFire}
+					/>
+				</div>
+			{/if}
+
+			<!-- Your board (at bottom - where you sit in real Battleship) -->
+			<div class="flex flex-col items-center gap-2 sm:gap-4 w-full">
 				{#if yourBoard}
 					<Board
 						board={yourBoard}
@@ -199,34 +227,6 @@
 						onRemoveShip={handleRemoveShip}
 						onReady={handleReady}
 						onPreviewChange={handlePreviewChange}
-					/>
-				{/if}
-			</div>
-
-			<!-- Game controls (center) -->
-			{#if isPlayingPhase}
-				<div class="flex flex-col items-center gap-4 w-full max-w-xs">
-					<GameControls
-						{isYourTurn}
-						{selectedTarget}
-						{canFire}
-						onFire={handleFire}
-					/>
-				</div>
-			{/if}
-
-			<!-- Opponent board -->
-			<div class="flex flex-col items-center gap-4">
-				{#if opponentBoard}
-					<Board
-						board={opponentBoard}
-						title={$_('game.opponentBoard')}
-						isOpponentBoard={true}
-						isClickable={isPlayingPhase && isYourTurn}
-						previewCoords={selectedTarget ? [selectedTarget] : []}
-						isValidPreview={true}
-						lastShotCoord={lastShotCoordForOpponentBoard}
-						onCellClick={handleOpponentBoardClick}
 					/>
 				{/if}
 			</div>
