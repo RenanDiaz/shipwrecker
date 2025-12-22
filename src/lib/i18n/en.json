@@ -5,9 +5,13 @@
 	},
 	"landing": {
 		"createGame": "Create Game",
+		"createGameDescription": "Start a new game and invite a friend to join",
 		"joinGame": "Join Game",
+		"joinGameDescription": "Enter the room ID shared by your friend",
 		"enterRoomId": "Enter Room ID",
 		"join": "Join",
+		"enterRoomIdError": "Please enter a room ID",
+		"roomIdTooShort": "Room ID must be at least 4 characters",
 		"instructions": "Instructions",
 		"howToPlay": "How to Play",
 		"step1": "Create a game or enter a room ID to join",

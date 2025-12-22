@@ -115,12 +115,6 @@ export function placeShip(
 		board.grid[coord.row][coord.col] = 'ship';
 	}
 
-	// Mark player ready if all ships placed
-	const player = state.player1?.id === playerId ? state.player1 : state.player2;
-	if (player && board.ships.length === TOTAL_SHIPS) {
-		player.ready = true;
-	}
-
 	return { success: true };
 }
 
