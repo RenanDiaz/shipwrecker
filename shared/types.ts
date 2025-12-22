@@ -1,0 +1,108 @@
+// Cell states for the game board
+export type CellState = 'empty' | 'ship' | 'hit' | 'miss' | 'sunk';
+
+// Coordinates on the board
+export interface Coord {
+	row: number;
+	col: number;
+}
+
+// Ship orientation
+export type Orientation = 'horizontal' | 'vertical';
+
+// Ship types
+export type ShipType = 'carrier' | 'battleship' | 'cruiser' | 'submarine' | 'destroyer';
+
+// Ship definition
+export interface Ship {
+	id: string;
+	type: ShipType;
+	length: number;
+	coords: Coord[];
+	hits: number;
+	sunk: boolean;
+}
+
+// Ship placement request
+export interface ShipPlacement {
+	shipType: ShipType;
+	startCoord: Coord;
+	orientation: Orientation;
+}
+
+// A player's board state
+export interface PlayerBoard {
+	grid: CellState[][];
+	ships: Ship[];
+	allShipsSunk: boolean;
+}
+
+// Game phases
+export type GamePhase = 'waiting' | 'setup' | 'playing' | 'finished';
+
+// Player info
+export interface PlayerInfo {
+	id: string;
+	ready: boolean;
+	connected: boolean;
+}
+
+// Complete game state
+export interface GameState {
+	roomId: string;
+	phase: GamePhase;
+	player1: PlayerInfo | null;
+	player2: PlayerInfo | null;
+	currentTurn: string | null;
+	winner: string | null;
+	boards: {
+		[playerId: string]: PlayerBoard;
+	};
+}
+
+// Client view of game state (hides opponent ship positions)
+export interface ClientGameState {
+	roomId: string;
+	phase: GamePhase;
+	playerId: string;
+	playerNumber: 1 | 2;
+	isYourTurn: boolean;
+	yourBoard: PlayerBoard;
+	opponentBoard: PlayerBoard; // ships hidden, only hits/misses shown
+	opponentReady: boolean;
+	opponentConnected: boolean;
+	winner: 'you' | 'opponent' | null;
+}
+
+// --- Messages from client to server ---
+
+export type ClientMessage =
+	| { type: 'join'; playerId: string }
+	| { type: 'placeShip'; placement: ShipPlacement }
+	| { type: 'removeShip'; shipType: ShipType }
+	| { type: 'ready' }
+	| { type: 'fire'; coord: Coord }
+	| { type: 'rematch' };
+
+// --- Messages from server to client ---
+
+export type ServerMessage =
+	| { type: 'gameState'; state: ClientGameState }
+	| { type: 'error'; message: string }
+	| { type: 'shotResult'; result: ShotResult }
+	| { type: 'opponentShot'; coord: Coord; result: 'hit' | 'miss' | 'sunk'; sunkShip?: ShipType }
+	| { type: 'playerJoined'; playerNumber: 1 | 2 }
+	| { type: 'playerLeft'; playerNumber: 1 | 2 }
+	| { type: 'phaseChange'; phase: GamePhase }
+	| { type: 'turnChange'; isYourTurn: boolean }
+	| { type: 'gameOver'; winner: 'you' | 'opponent' }
+	| { type: 'rematchRequested'; byPlayer: 1 | 2 }
+	| { type: 'rematchStarted' };
+
+// Shot result
+export interface ShotResult {
+	coord: Coord;
+	result: 'hit' | 'miss' | 'sunk';
+	sunkShip?: ShipType;
+	gameOver: boolean;
+}

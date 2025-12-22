@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--color-hit: #dc2626;
+	--color-miss: #e5e7eb;
+	--color-ship: #4b5563;
+	--color-sunk: #7f1d1d;
+	--color-water: #0ea5e9;
+	--color-water-dark: #0284c7;
+}
+
+body {
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.cell-water {
+	background: linear-gradient(135deg, var(--color-water) 0%, var(--color-water-dark) 100%);
+}
+
+.cell-hit {
+	background-color: var(--color-hit);
+}
+
+.cell-miss {
+	background-color: var(--color-miss);
+}
+
+.cell-ship {
+	background-color: var(--color-ship);
+}
+
+.cell-sunk {
+	background-color: var(--color-sunk);
+}
+
+.cell-hover:hover {
+	filter: brightness(1.2);
+	cursor: pointer;
+}
+
+.cell-valid {
+	background-color: rgba(34, 197, 94, 0.6);
+}
+
+.cell-invalid {
+	background-color: rgba(239, 68, 68, 0.6);
+}
+
+@keyframes ripple {
+	0% {
+		transform: scale(0);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(2);
+		opacity: 0;
+	}
+}
+
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	25% { transform: translateX(-5px); }
+	75% { transform: translateX(5px); }
+}
+
+.animate-ripple {
+	animation: ripple 0.6s ease-out forwards;
+}
+
+.animate-shake {
+	animation: shake 0.3s ease-in-out;
+}
