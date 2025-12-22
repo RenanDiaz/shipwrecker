@@ -14,11 +14,11 @@
 	function joinGame(): void {
 		const id = joinRoomId.trim().toUpperCase();
 		if (!id) {
-			joinError = 'Please enter a room ID';
+			joinError = $_('landing.enterRoomIdError');
 			return;
 		}
 		if (id.length < 4) {
-			joinError = 'Room ID must be at least 4 characters';
+			joinError = $_('landing.roomIdTooShort');
 			return;
 		}
 		joinError = '';
@@ -32,7 +32,7 @@
 	}
 </script>
 
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto px-4 sm:px-0 overflow-hidden">
 	<!-- Hero section -->
 	<div class="text-center mb-12">
 		<h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
@@ -46,10 +46,10 @@
 	<!-- Game actions -->
 	<div class="grid md:grid-cols-2 gap-6 mb-12">
 		<!-- Create game -->
-		<div class="bg-navy-800/50 rounded-xl p-6 border border-navy-700/50">
-			<h2 class="text-xl font-semibold text-white mb-4">{$_('landing.createGame')}</h2>
-			<p class="text-gray-400 mb-4 text-sm">
-				Start a new game and invite a friend to join
+		<div class="bg-navy-800/50 rounded-xl p-4 sm:p-6 border border-navy-700/50 min-w-0">
+			<h2 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">{$_('landing.createGame')}</h2>
+			<p class="text-gray-400 mb-3 sm:mb-4 text-sm">
+				{$_('landing.createGameDescription')}
 			</p>
 			<button
 				type="button"
@@ -61,15 +61,15 @@
 		</div>
 
 		<!-- Join game -->
-		<div class="bg-navy-800/50 rounded-xl p-6 border border-navy-700/50">
-			<h2 class="text-xl font-semibold text-white mb-4">{$_('landing.joinGame')}</h2>
-			<p class="text-gray-400 mb-4 text-sm">
-				Enter the room ID shared by your friend
+		<div class="bg-navy-800/50 rounded-xl p-4 sm:p-6 border border-navy-700/50 min-w-0">
+			<h2 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">{$_('landing.joinGame')}</h2>
+			<p class="text-gray-400 mb-3 sm:mb-4 text-sm">
+				{$_('landing.joinGameDescription')}
 			</p>
-			<div class="flex gap-2">
+			<div class="flex flex-col sm:flex-row gap-2">
 				<input
 					type="text"
-					class="flex-1 px-4 py-3 bg-navy-900 border border-navy-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ocean-500 uppercase"
+					class="flex-1 px-4 py-3 bg-navy-900 border border-navy-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ocean-500 uppercase min-w-0"
 					placeholder={$_('landing.enterRoomId')}
 					bind:value={joinRoomId}
 					onkeydown={handleKeydown}
@@ -77,7 +77,7 @@
 				/>
 				<button
 					type="button"
-					class="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition-colors"
+					class="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition-colors whitespace-nowrap"
 					onclick={joinGame}
 				>
 					{$_('landing.join')}

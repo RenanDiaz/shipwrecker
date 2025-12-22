@@ -5,9 +5,13 @@
 	},
 	"landing": {
 		"createGame": "Crear Partida",
+		"createGameDescription": "Inicia una nueva partida e invita a un amigo",
 		"joinGame": "Unirse a Partida",
+		"joinGameDescription": "Ingresa el ID de sala que te compartió tu amigo",
 		"enterRoomId": "Ingresa el ID de la Sala",
 		"join": "Unirse",
+		"enterRoomIdError": "Por favor ingresa un ID de sala",
+		"roomIdTooShort": "El ID de sala debe tener al menos 4 caracteres",
 		"instructions": "Instrucciones",
 		"howToPlay": "Cómo Jugar",
 		"step1": "Crea una partida o ingresa un ID de sala para unirte",
