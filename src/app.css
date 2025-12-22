@@ -9,10 +9,71 @@
 	--color-sunk: #7f1d1d;
 	--color-water: #0ea5e9;
 	--color-water-dark: #0284c7;
+
+	/* Mobile-first responsive cell sizing */
+	/* Base: ~30px cells fit 10 cells + labels in ~340px viewport */
+	--cell-size: min(7.5vw, 30px);
+}
+
+/* Small screens (sm: 640px+) */
+@media (min-width: 640px) {
+	:root {
+		--cell-size: 36px;
+	}
+}
+
+/* Medium screens (md: 768px+) */
+@media (min-width: 768px) {
+	:root {
+		--cell-size: 40px;
+	}
+}
+
+/* Large screens (lg: 1024px+) */
+@media (min-width: 1024px) {
+	:root {
+		--cell-size: 44px;
+	}
 }
 
 body {
 	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Responsive board cell */
+.board-cell {
+	width: var(--cell-size);
+	height: var(--cell-size);
+	min-width: 28px;
+	min-height: 28px;
+	touch-action: manipulation; /* Better touch handling */
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Board cell label (for column headers) */
+.board-cell-label {
+	width: var(--cell-size);
+	height: calc(var(--cell-size) * 0.6);
+	min-width: 28px;
+}
+
+/* Board cell height (for row labels) */
+.board-cell-height {
+	height: var(--cell-size);
+	min-height: 28px;
+}
+
+/* Clickable cells - larger touch target indicator */
+.cell-clickable {
+	cursor: pointer;
+}
+
+/* Active state for touch devices */
+@media (hover: none) {
+	.cell-clickable:active {
+		transform: scale(0.95);
+		filter: brightness(1.3);
+	}
 }
 
 .cell-water {

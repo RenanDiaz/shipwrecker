@@ -10,6 +10,14 @@ import type {
 	ShotResult
 } from '../../../shared/types';
 import { generatePlayerId } from '../../../shared/constants';
+import {
+	playHitSound,
+	playMissSound,
+	playSinkSound,
+	playTurnSound,
+	playIncomingSound,
+	initializeSounds
+} from '$lib/utils/sounds';
 
 // Game connection state
 interface ConnectionState {
@@ -29,7 +37,7 @@ function createGameStore() {
 	let rematchRequestedBy = $state<1 | 2 | null>(null);
 	let linkCopied = $state(false);
 
-	// Initialize player ID
+	// Initialize player ID and sounds
 	if (browser) {
 		const stored = localStorage.getItem('shipwrecker_playerId');
 		if (stored) {
@@ -38,6 +46,7 @@ function createGameStore() {
 			playerId = generatePlayerId();
 			localStorage.setItem('shipwrecker_playerId', playerId);
 		}
+		initializeSounds();
 	}
 
 	// Connect to a room
@@ -110,6 +119,14 @@ function createGameStore() {
 				break;
 			case 'shotResult':
 				lastShotResult = message.result;
+				// Play sound based on result
+				if (message.result.result === 'sunk') {
+					playSinkSound();
+				} else if (message.result.result === 'hit') {
+					playHitSound();
+				} else {
+					playMissSound();
+				}
 				// Clear after animation
 				setTimeout(() => {
 					lastShotResult = null;
@@ -120,6 +137,8 @@ function createGameStore() {
 					coord: message.coord,
 					result: message.result
 				};
+				// Play incoming shot sound
+				playIncomingSound();
 				// Clear after animation
 				setTimeout(() => {
 					lastOpponentShot = null;
@@ -128,6 +147,10 @@ function createGameStore() {
 			case 'turnChange':
 				if (gameState) {
 					gameState = { ...gameState, isYourTurn: message.isYourTurn };
+					// Play turn notification when it becomes your turn
+					if (message.isYourTurn) {
+						playTurnSound();
+					}
 				}
 				break;
 			case 'phaseChange':

@@ -53,8 +53,9 @@
 
 <button
 	type="button"
-	class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border border-navy-700/30 rounded-sm transition-all duration-150 relative {cellClass}"
+	class="board-cell border border-navy-700/30 rounded-sm transition-all duration-150 relative {cellClass}"
 	class:cell-hover={isClickable}
+	class:cell-clickable={isClickable}
 	class:cursor-not-allowed={!isClickable && state !== 'empty' && state !== 'ship'}
 	class:animate-shake={isLastShot && (state === 'hit' || state === 'sunk')}
 	disabled={!isClickable}
@@ -64,11 +65,11 @@
 	aria-label="Cell {coord.col + 1}, {coord.row + 1}"
 >
 	{#if state === 'hit'}
-		<span class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">✕</span>
+		<span class="absolute inset-0 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg">✕</span>
 	{:else if state === 'miss'}
-		<span class="absolute inset-0 flex items-center justify-center text-gray-500 text-lg">•</span>
+		<span class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm sm:text-base md:text-lg">•</span>
 	{:else if state === 'sunk'}
-		<span class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">✕</span>
+		<span class="absolute inset-0 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg">✕</span>
 	{/if}
 
 	{#if isLastShot}
