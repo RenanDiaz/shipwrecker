@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { onMount } from 'svelte';
+	import { playVictorySound, playDefeatSound, playClickSound } from '$lib/utils/sounds';
 
 	interface Props {
 		winner: 'you' | 'opponent';
@@ -18,13 +20,45 @@
 	}: Props = $props();
 
 	let isWin = $derived(winner === 'you');
+	let visible = $state(false);
+
+	onMount(() => {
+		// Trigger entrance animation
+		requestAnimationFrame(() => {
+			visible = true;
+		});
+		// Play victory or defeat sound
+		if (isWin) {
+			playVictorySound();
+		} else {
+			playDefeatSound();
+		}
+	});
+
+	function handlePlayAgain() {
+		playClickSound();
+		onPlayAgain();
+	}
+
+	function handleClose() {
+		playClickSound();
+		onClose();
+	}
 </script>
 
-<div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+<div
+	class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 transition-opacity duration-300"
+	class:opacity-0={!visible}
+	class:opacity-100={visible}
+>
 	<div
-		class="bg-navy-800 rounded-xl p-8 max-w-md w-full text-center shadow-2xl border-2"
+		class="bg-navy-800 rounded-xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl border-2 transition-all duration-300"
 		class:border-green-500={isWin}
 		class:border-red-500={!isWin}
+		class:scale-90={!visible}
+		class:scale-100={visible}
+		class:opacity-0={!visible}
+		class:opacity-100={visible}
 	>
 		<!-- Trophy or skull icon -->
 		<div class="text-6xl mb-4">
@@ -55,22 +89,19 @@
 		<div class="flex flex-col gap-3">
 			<button
 				type="button"
-				class="py-3 px-6 rounded-lg font-semibold text-white transition-colors"
-				class:bg-green-600={!rematchRequested}
-				class:hover:bg-green-500={!rematchRequested}
-				class:bg-gray-600={rematchRequested}
+				class="py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 touch-manipulation active:scale-95 {!rematchRequested ? 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-500/30' : 'bg-gray-600'}"
 				disabled={rematchRequested}
-				onclick={onPlayAgain}
+				onclick={handlePlayAgain}
 			>
 				{$_('game.playAgain')}
 			</button>
 
 			<button
 				type="button"
-				class="py-2 px-4 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-navy-700 transition-colors"
-				onclick={onClose}
+				class="py-2 px-4 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-navy-700 transition-all duration-200 touch-manipulation active:scale-95"
+				onclick={handleClose}
 			>
-				Back to Lobby
+				{$_('game.backToLobby')}
 			</button>
 		</div>
 	</div>

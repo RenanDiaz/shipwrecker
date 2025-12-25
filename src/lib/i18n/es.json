@@ -27,6 +27,7 @@
 		"yourTurn": "Tu Turno",
 		"opponentTurn": "Turno del Oponente",
 		"fire": "¡Fuego!",
+		"selectTarget": "Toca el tablero enemigo para seleccionar objetivo",
 		"hit": "¡Tocado!",
 		"miss": "¡Agua!",
 		"shipSunk": "¡Barco Hundido!",
@@ -46,7 +47,8 @@
 		"opponentDisconnected": "Oponente desconectado",
 		"connecting": "Conectando...",
 		"rematchRequested": "Revancha solicitada...",
-		"opponentWantsRematch": "¡El oponente quiere revancha!"
+		"opponentWantsRematch": "¡El oponente quiere revancha!",
+		"backToLobby": "Volver al Lobby"
 	},
 	"ships": {
 		"carrier": "Portaaviones",

@@ -7,6 +7,7 @@ import { browser } from '$app/environment';
 
 let audioContext: AudioContext | null = null;
 let soundEnabled = true;
+let masterVolume = 0.7; // 0.0 to 1.0
 
 // Initialize audio context lazily (must be triggered by user interaction)
 function getAudioContext(): AudioContext | null {
@@ -48,7 +49,7 @@ function playTone(
 
 	oscillator.type = type;
 	oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
-	gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+	gainNode.gain.setValueAtTime(volume * masterVolume, ctx.currentTime);
 
 	if (fadeOut) {
 		gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
@@ -79,7 +80,7 @@ function playNoise(duration: number, volume: number = 0.2, lowpass: number = 100
 	filter.frequency.value = lowpass;
 
 	const gainNode = ctx.createGain();
-	gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+	gainNode.gain.setValueAtTime(volume * masterVolume, ctx.currentTime);
 	gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
 
 	noise.connect(filter);
@@ -170,11 +171,76 @@ export function playIncomingSound(): void {
 	osc.frequency.setValueAtTime(600, ctx.currentTime);
 	osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2);
 
-	gain.gain.setValueAtTime(0.1, ctx.currentTime);
+	gain.gain.setValueAtTime(0.1 * masterVolume, ctx.currentTime);
 	gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
 
 	osc.start();
 	osc.stop(ctx.currentTime + 0.2);
+}
+
+/**
+ * Play button click sound - subtle feedback
+ */
+export function playClickSound(): void {
+	const ctx = getAudioContext();
+	if (!ctx || !soundEnabled) return;
+
+	// Quick, subtle click
+	playTone(800, 0.05, 'sine', 0.08);
+}
+
+/**
+ * Play ship placement sound - satisfying thunk
+ */
+export function playPlaceShipSound(): void {
+	const ctx = getAudioContext();
+	if (!ctx || !soundEnabled) return;
+
+	// Deep thunk with metallic resonance
+	playTone(150, 0.15, 'triangle', 0.2);
+	playTone(300, 0.1, 'sine', 0.1);
+	playNoise(0.08, 0.1, 600);
+}
+
+/**
+ * Play ready confirmation sound - positive chime
+ */
+export function playReadySound(): void {
+	const ctx = getAudioContext();
+	if (!ctx || !soundEnabled) return;
+
+	// Ascending three-note chime
+	playTone(523.25, 0.12, 'sine', 0.12); // C5
+	setTimeout(() => playTone(659.25, 0.12, 'sine', 0.12), 80); // E5
+	setTimeout(() => playTone(783.99, 0.18, 'sine', 0.15), 160); // G5
+}
+
+/**
+ * Play victory fanfare - triumphant sound
+ */
+export function playVictorySound(): void {
+	const ctx = getAudioContext();
+	if (!ctx || !soundEnabled) return;
+
+	// Triumphant ascending fanfare
+	playTone(523.25, 0.2, 'sine', 0.15); // C5
+	setTimeout(() => playTone(659.25, 0.2, 'sine', 0.15), 150); // E5
+	setTimeout(() => playTone(783.99, 0.2, 'sine', 0.15), 300); // G5
+	setTimeout(() => playTone(1046.5, 0.4, 'sine', 0.2), 450); // C6 (sustained)
+	setTimeout(() => playTone(783.99, 0.3, 'triangle', 0.1), 500); // Harmony
+}
+
+/**
+ * Play defeat sound - somber descending tone
+ */
+export function playDefeatSound(): void {
+	const ctx = getAudioContext();
+	if (!ctx || !soundEnabled) return;
+
+	// Descending sad tones
+	playTone(392, 0.25, 'sine', 0.12); // G4
+	setTimeout(() => playTone(349.23, 0.25, 'sine', 0.1), 200); // F4
+	setTimeout(() => playTone(293.66, 0.4, 'sine', 0.08), 400); // D4
 }
 
 /**
@@ -201,6 +267,11 @@ export function initializeSounds(): void {
 	if (browser) {
 		const stored = localStorage.getItem('shipwrecker_soundEnabled');
 		soundEnabled = stored !== 'false';
+		// Also initialize volume
+		const storedVolume = localStorage.getItem('shipwrecker_volume');
+		if (storedVolume !== null) {
+			masterVolume = parseFloat(storedVolume);
+		}
 	}
 }
 
@@ -210,4 +281,33 @@ export function initializeSounds(): void {
 export function toggleSound(): boolean {
 	setSoundEnabled(!soundEnabled);
 	return soundEnabled;
+}
+
+/**
+ * Set master volume (0.0 to 1.0)
+ */
+export function setVolume(volume: number): void {
+	masterVolume = Math.max(0, Math.min(1, volume));
+	if (browser) {
+		localStorage.setItem('shipwrecker_volume', String(masterVolume));
+	}
+}
+
+/**
+ * Get current master volume
+ */
+export function getVolume(): number {
+	return masterVolume;
+}
+
+/**
+ * Initialize volume from storage
+ */
+export function initializeVolume(): void {
+	if (browser) {
+		const stored = localStorage.getItem('shipwrecker_volume');
+		if (stored !== null) {
+			masterVolume = parseFloat(stored);
+		}
+	}
 }

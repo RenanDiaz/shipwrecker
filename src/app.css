@@ -126,10 +126,98 @@ body {
 	75% { transform: translateX(5px); }
 }
 
+@keyframes target-pulse {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.7;
+		transform: scale(0.95);
+	}
+}
+
+@keyframes sunk-flash {
+	0% {
+		background-color: var(--color-hit);
+		transform: scale(1);
+	}
+	25% {
+		background-color: #fef08a;
+		transform: scale(1.1);
+	}
+	50% {
+		background-color: var(--color-hit);
+		transform: scale(1);
+	}
+	75% {
+		background-color: var(--color-sunk);
+		transform: scale(0.95);
+	}
+	100% {
+		background-color: var(--color-sunk);
+		transform: scale(1);
+	}
+}
+
+@keyframes cell-pop {
+	0% {
+		opacity: 0;
+		transform: scale(0.8);
+	}
+	70% {
+		transform: scale(1.05);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
 .animate-ripple {
 	animation: ripple 0.6s ease-out forwards;
 }
 
 .animate-shake {
 	animation: shake 0.3s ease-in-out;
+}
+
+.animate-target-pulse {
+	animation: target-pulse 0.8s ease-in-out infinite;
+}
+
+.animate-sunk {
+	animation: sunk-flash 0.6s ease-out, shake 0.4s ease-in-out 0.1s;
+}
+
+/* Cell entrance animation */
+.cell-entrance {
+	transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Target cell styling */
+.cell-target {
+	box-shadow: 0 0 12px 2px rgba(248, 113, 113, 0.6);
+}
+
+/* Improved mobile touch feedback */
+@media (hover: none) {
+	.cell-clickable:active {
+		transform: scale(0.92);
+		filter: brightness(1.4);
+		transition: transform 0.1s ease-out, filter 0.1s ease-out;
+	}
+
+	/* Better touch feedback for buttons */
+	button:active {
+		transform: scale(0.97);
+	}
+}
+
+/* Larger touch targets on mobile */
+@media (max-width: 400px) {
+	.board-cell {
+		min-width: 32px;
+		min-height: 32px;
+	}
 }

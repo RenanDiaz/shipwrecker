@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Coord } from '../../../shared/types';
 	import { _ } from 'svelte-i18n';
+	import { playClickSound } from '$lib/utils/sounds';
 
 	interface Props {
 		isYourTurn: boolean;
@@ -15,43 +16,39 @@
 		canFire,
 		onFire
 	}: Props = $props();
+
+	function handleFire() {
+		if (canFire) {
+			playClickSound();
+			onFire();
+		}
+	}
 </script>
 
 <div class="bg-navy-800/50 rounded-lg p-3 sm:p-4">
 	<div class="text-center">
-		<!-- Turn indicator -->
+		<!-- Turn indicator - enhanced visibility -->
 		<div
-			class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4"
-			class:bg-green-600={isYourTurn}
-			class:animate-pulse={isYourTurn}
-			class:bg-orange-600={!isYourTurn}
+			class="inline-block px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-3 sm:mb-4 transition-all duration-300 {isYourTurn ? 'bg-green-600 shadow-lg shadow-green-500/50 scale-105' : 'bg-orange-600/80'}"
 		>
-			<span class="font-semibold text-white text-sm sm:text-base">
+			<span class="font-bold text-white text-sm sm:text-lg tracking-wide">
 				{isYourTurn ? $_('game.yourTurn') : $_('game.opponentTurn')}
 			</span>
 		</div>
 
-		<!-- Fire button -->
-		{#if isYourTurn}
+		<!-- Fire button container - fixed height to prevent layout shift -->
+		<div class="h-[72px] sm:h-[88px] flex flex-col justify-start">
 			<button
 				type="button"
-				class="w-full py-3 sm:py-4 px-6 rounded-lg font-bold text-base sm:text-lg transition-all touch-manipulation"
-				class:bg-red-600={canFire}
-				class:hover:bg-red-500={canFire}
-				class:active:bg-red-700={canFire}
-				class:bg-gray-600={!canFire}
-				class:cursor-not-allowed={!canFire}
-				class:text-white={true}
-				disabled={!canFire}
-				onclick={onFire}
+				class="w-full py-3 sm:py-4 px-6 rounded-lg font-bold text-base sm:text-lg transition-all duration-200 touch-manipulation text-white {isYourTurn && canFire ? 'bg-red-600 hover:bg-red-500 active:bg-red-700 shadow-lg shadow-red-500/40' : ''} {isYourTurn && !canFire ? 'bg-gray-600 cursor-not-allowed' : ''} {!isYourTurn ? 'bg-navy-700 opacity-50 cursor-default' : ''}"
+				disabled={!canFire || !isYourTurn}
+				onclick={handleFire}
 			>
 				{$_('game.fire')}
 			</button>
-			{#if !selectedTarget}
-				<p class="text-xs sm:text-sm text-gray-400 mt-2">
-					Tap opponent's board to select target
-				</p>
-			{/if}
-		{/if}
+			<p class="text-xs sm:text-sm text-gray-400 mt-2 h-5 transition-opacity duration-200 {isYourTurn && !selectedTarget ? 'opacity-100' : 'opacity-0'}">
+				{$_('game.selectTarget')}
+			</p>
+		</div>
 	</div>
 </div>

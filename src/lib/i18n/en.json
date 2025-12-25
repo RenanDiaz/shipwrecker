@@ -27,6 +27,7 @@
 		"yourTurn": "Your Turn",
 		"opponentTurn": "Opponent's Turn",
 		"fire": "Fire!",
+		"selectTarget": "Tap opponent's board to select target",
 		"hit": "Hit!",
 		"miss": "Miss!",
 		"shipSunk": "Ship Sunk!",
@@ -46,7 +47,8 @@
 		"opponentDisconnected": "Opponent disconnected",
 		"connecting": "Connecting...",
 		"rematchRequested": "Rematch requested...",
-		"opponentWantsRematch": "Opponent wants a rematch!"
+		"opponentWantsRematch": "Opponent wants a rematch!",
+		"backToLobby": "Back to Lobby"
 	},
 	"ships": {
 		"carrier": "Carrier",

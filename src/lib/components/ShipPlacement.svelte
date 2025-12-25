@@ -5,6 +5,7 @@
 	import { validatePlacement, getNextShipToPlace } from '$lib/utils/gameLogic';
 	import { getShipPreviewCoords } from '$lib/utils/boardUtils';
 	import ShipComponent from './Ship.svelte';
+	import { playPlaceShipSound, playReadySound, playClickSound } from '$lib/utils/sounds';
 
 	interface Props {
 		placedShips: Ship[];
@@ -73,9 +74,16 @@
 
 		const { valid } = validatePlacement(selectedShipType, coord, orientation, placedShips, grid);
 		if (valid) {
+			playPlaceShipSound();
 			onPlaceShip(selectedShipType, coord, orientation);
 			selectedShipType = null;
 		}
+	}
+
+	// Handle ready button click
+	function handleReady(): void {
+		playReadySound();
+		onReady();
 	}
 
 	// Remove a placed ship
@@ -138,7 +146,7 @@
 			<button
 				type="button"
 				class="w-full py-3 sm:py-3 px-4 bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-semibold rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
-				onclick={onReady}
+				onclick={handleReady}
 			>
 				{$_('game.ready')}
 			</button>

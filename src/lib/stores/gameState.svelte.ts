@@ -127,10 +127,10 @@ function createGameStore() {
 				} else {
 					playMissSound();
 				}
-				// Clear after animation
+				// Clear after animation - longer duration for sunk ships
 				setTimeout(() => {
 					lastShotResult = null;
-				}, 2000);
+				}, message.result.result === 'sunk' ? 4000 : 3000);
 				break;
 			case 'opponentShot':
 				lastOpponentShot = {
@@ -142,7 +142,7 @@ function createGameStore() {
 				// Clear after animation
 				setTimeout(() => {
 					lastOpponentShot = null;
-				}, 2000);
+				}, 3000);
 				break;
 			case 'turnChange':
 				if (gameState) {
