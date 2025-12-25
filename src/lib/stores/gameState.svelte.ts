@@ -7,7 +7,11 @@ import type {
 	Coord,
 	ShipPlacement,
 	ShipType,
-	ShotResult
+	ShotResult,
+	ChatMessage,
+	ChatMessageType,
+	PresetMessageId,
+	ReactionId
 } from '../../../shared/types';
 import { generatePlayerId } from '../../../shared/constants';
 import {
@@ -36,6 +40,8 @@ function createGameStore() {
 	let lastOpponentShot = $state<{ coord: Coord; result: 'hit' | 'miss' | 'sunk' } | null>(null);
 	let rematchRequestedBy = $state<1 | 2 | null>(null);
 	let linkCopied = $state(false);
+	let chatMessages = $state<ChatMessage[]>([]);
+	const MAX_CHAT_MESSAGES = 50;
 
 	// Initialize player ID and sounds
 	if (browser) {
@@ -170,6 +176,11 @@ function createGameStore() {
 				rematchRequestedBy = null;
 				lastShotResult = null;
 				lastOpponentShot = null;
+				chatMessages = [];
+				break;
+			case 'chatMessage':
+				// Add new message and keep only the last MAX_CHAT_MESSAGES
+				chatMessages = [...chatMessages, message.message].slice(-MAX_CHAT_MESSAGES);
 				break;
 			case 'playerJoined':
 			case 'playerLeft':
@@ -197,6 +208,10 @@ function createGameStore() {
 
 	function requestRematch(): void {
 		sendMessage({ type: 'rematch' });
+	}
+
+	function sendChat(messageType: ChatMessageType, content: PresetMessageId | ReactionId): void {
+		sendMessage({ type: 'chat', messageType, content });
 	}
 
 	function copyRoomLink(): void {
@@ -236,6 +251,9 @@ function createGameStore() {
 		get linkCopied() {
 			return linkCopied;
 		},
+		get chatMessages() {
+			return chatMessages;
+		},
 		// Actions
 		connect,
 		disconnect,
@@ -244,6 +262,7 @@ function createGameStore() {
 		setReady,
 		fire,
 		requestRematch,
+		sendChat,
 		copyRoomLink
 	};
 }

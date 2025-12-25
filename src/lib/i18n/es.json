@@ -41,6 +41,7 @@
 		"waitingForReady": "Esperando a que el oponente esté listo...",
 		"youAreReady": "¡Estás listo! Esperando al oponente...",
 		"rotate": "Rotar",
+		"random": "Aleatorio",
 		"removeShip": "Quitar Barco",
 		"allShipsPlaced": "¡Todos los barcos colocados!",
 		"placeNextShip": "Coloca tu {ship}",
@@ -60,5 +61,20 @@
 	"language": {
 		"en": "English",
 		"es": "Español"
+	},
+	"chat": {
+		"title": "Chat",
+		"noMessages": "Sin mensajes aún",
+		"reactions": "Enviar reacción",
+		"messages": {
+			"gl": "¡Buena suerte!",
+			"gg": "¡Buen juego!",
+			"ns": "¡Buen tiro!",
+			"oops": "¡Ups!",
+			"wow": "¡Wow!",
+			"hurry": "¡Date prisa!",
+			"rematch": "¿Revancha?",
+			"bye": "¡Adiós!"
+		}
 	}
 }
