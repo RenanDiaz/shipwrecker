@@ -147,19 +147,23 @@
 		</div>
 	{/if}
 
-	<!-- Shot result feedback -->
-	{#if lastShotResult}
-		<div
-			class="text-center py-1.5 sm:py-2 rounded-lg font-bold text-base sm:text-lg animate-pulse"
-			class:bg-red-600={lastShotResult.result === 'hit' || lastShotResult.result === 'sunk'}
-			class:bg-gray-600={lastShotResult.result === 'miss'}
-		>
-			{#if lastShotResult.result === 'sunk'}
-				{$_('game.shipSunk')} ({$_(`ships.${lastShotResult.sunkShip}`)})
-			{:else if lastShotResult.result === 'hit'}
-				{$_('game.hit')}
-			{:else}
-				{$_('game.miss')}
+	<!-- Shot result feedback - fixed height container to prevent layout shifts -->
+	{#if phase === 'playing'}
+		<div class="min-h-[40px] sm:min-h-[44px] flex items-center justify-center">
+			{#if lastShotResult}
+				<div
+					class="w-full text-center py-1.5 sm:py-2 rounded-lg font-bold text-base sm:text-lg animate-pulse"
+					class:bg-red-600={lastShotResult.result === 'hit' || lastShotResult.result === 'sunk'}
+					class:bg-gray-600={lastShotResult.result === 'miss'}
+				>
+					{#if lastShotResult.result === 'sunk'}
+						{$_('game.shipSunk')} ({$_(`ships.${lastShotResult.sunkShip}`)})
+					{:else if lastShotResult.result === 'hit'}
+						{$_('game.hit')}
+					{:else}
+						{$_('game.miss')}
+					{/if}
+				</div>
 			{/if}
 		</div>
 	{/if}
