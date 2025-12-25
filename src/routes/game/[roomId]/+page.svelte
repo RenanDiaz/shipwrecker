@@ -9,7 +9,8 @@
 	import GameControls from '$lib/components/GameControls.svelte';
 	import GameStatus from '$lib/components/GameStatus.svelte';
 	import WinnerModal from '$lib/components/WinnerModal.svelte';
-	import type { Coord, Orientation, ShipType } from '../../../../shared/types';
+	import Chat from '$lib/components/Chat.svelte';
+	import type { Coord, Orientation, ShipType, ShipPlacement as ShipPlacementData, ChatMessageType, PresetMessageId, ReactionId } from '../../../../shared/types';
 	import { TOTAL_SHIPS } from '../../../../shared/constants';
 
 	// Get room ID from URL
@@ -44,6 +45,7 @@
 	let lastOpponentShot = $derived(gameStore.lastOpponentShot);
 	let rematchRequestedBy = $derived(gameStore.rematchRequestedBy);
 	let linkCopied = $derived(gameStore.linkCopied);
+	let chatMessages = $derived(gameStore.chatMessages);
 
 	// Computed values
 	let isSetupPhase = $derived(gameState?.phase === 'setup');
@@ -76,6 +78,20 @@
 	function handlePreviewChange(coords: Coord[], isValid: boolean): void {
 		previewCoords = coords;
 		isValidPreview = isValid;
+	}
+
+	function handleRandomPlace(placements: ShipPlacementData[]): void {
+		// Remove all existing ships first
+		if (yourBoard) {
+			for (const ship of yourBoard.ships) {
+				gameStore.removeShip(ship.type);
+			}
+		}
+		// Place all ships from the random placements
+		for (const placement of placements) {
+			gameStore.placeShip(placement);
+		}
+		previewCoords = [];
 	}
 
 	// Board interaction handlers for setup
@@ -122,6 +138,10 @@
 
 	function handleCloseModal(): void {
 		goto('/');
+	}
+
+	function handleSendChat(messageType: ChatMessageType, content: PresetMessageId | ReactionId): void {
+		gameStore.sendChat(messageType, content);
 	}
 
 	// Calculate last shot coordinate for animation
@@ -227,7 +247,19 @@
 						onRemoveShip={handleRemoveShip}
 						onReady={handleReady}
 						onPreviewChange={handlePreviewChange}
+						onRandomPlace={handleRandomPlace}
 					/>
+				{/if}
+
+				<!-- Chat (show when opponent is connected) -->
+				{#if gameState.opponentConnected}
+					<div class="mt-2">
+						<Chat
+							messages={chatMessages}
+							playerNumber={gameState.playerNumber}
+							onSendMessage={handleSendChat}
+						/>
+					</div>
 				{/if}
 			</div>
 		</div>

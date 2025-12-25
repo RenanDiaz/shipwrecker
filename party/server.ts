@@ -1,5 +1,5 @@
 import type * as Party from 'partykit/server';
-import type { ClientMessage, ServerMessage, GameState } from '../shared/types';
+import type { ClientMessage, ServerMessage, GameState, ChatMessage, ChatMessageType, PresetMessageId, ReactionId } from '../shared/types';
 import {
 	createGameState,
 	addPlayer,
@@ -21,6 +21,7 @@ export default class ShipWreckerServer implements Party.Server {
 	private gameState: GameState;
 	private connections: Map<string, ConnectionInfo> = new Map();
 	private rematchRequests: Set<string> = new Set();
+	private chatMessageCounter: number = 0;
 
 	constructor(readonly room: Party.Room) {
 		this.gameState = createGameState(room.id);
@@ -89,6 +90,9 @@ export default class ShipWreckerServer implements Party.Server {
 				break;
 			case 'rematch':
 				this.handleRematch(sender);
+				break;
+			case 'chat':
+				this.handleChat(sender, parsed.messageType, parsed.content);
 				break;
 		}
 	}
@@ -279,6 +283,31 @@ export default class ShipWreckerServer implements Party.Server {
 			this.broadcast({ type: 'phaseChange', phase: 'setup' });
 			this.broadcastGameState();
 		}
+	}
+
+	private handleChat(
+		conn: Party.Connection,
+		messageType: ChatMessageType,
+		content: PresetMessageId | ReactionId
+	): void {
+		const info = this.connections.get(conn.id);
+		if (!info) return;
+
+		// Determine player number
+		const playerNumber: 1 | 2 =
+			this.gameState.player1?.id === info.playerId ? 1 : 2;
+
+		// Create chat message
+		const chatMessage: ChatMessage = {
+			id: `msg_${++this.chatMessageCounter}`,
+			from: playerNumber,
+			messageType,
+			content,
+			timestamp: Date.now()
+		};
+
+		// Broadcast to all players
+		this.broadcast({ type: 'chatMessage', message: chatMessage });
 	}
 
 	private sendToConnection(conn: Party.Connection, message: ServerMessage): void {

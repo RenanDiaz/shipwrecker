@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Coord, Orientation, ShipType, Ship, CellState } from '../../../shared/types';
+	import type { Coord, Orientation, ShipType, Ship, CellState, ShipPlacement as ShipPlacementData } from '../../../shared/types';
 	import { SHIP_TYPES, SHIP_CONFIGS } from '../../../shared/constants';
 	import { _ } from 'svelte-i18n';
-	import { validatePlacement, getNextShipToPlace } from '$lib/utils/gameLogic';
+	import { validatePlacement, getNextShipToPlace, generateRandomPlacements } from '$lib/utils/gameLogic';
 	import { getShipPreviewCoords } from '$lib/utils/boardUtils';
 	import ShipComponent from './Ship.svelte';
 	import { playPlaceShipSound, playReadySound, playClickSound } from '$lib/utils/sounds';
@@ -14,6 +14,7 @@
 		onRemoveShip: (shipType: ShipType) => void;
 		onReady: () => void;
 		onPreviewChange: (coords: Coord[], isValid: boolean) => void;
+		onRandomPlace: (placements: ShipPlacementData[]) => void;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		onPlaceShip,
 		onRemoveShip,
 		onReady,
-		onPreviewChange
+		onPreviewChange,
+		onRandomPlace
 	}: Props = $props();
 
 	// Local state
@@ -91,6 +93,14 @@
 		onRemoveShip(type);
 		selectedShipType = type;
 	}
+
+	// Handle random placement
+	function handleRandomPlace(): void {
+		playClickSound();
+		const placements = generateRandomPlacements();
+		onRandomPlace(placements);
+		selectedShipType = null;
+	}
 </script>
 
 <div class="bg-navy-800/50 rounded-lg p-3 sm:p-4 w-full max-w-xs mx-auto">
@@ -123,20 +133,38 @@
 		{/each}
 	</div>
 
-	<!-- Orientation toggle -->
+	<!-- Orientation toggle and Random button -->
 	{#if selectedShipType}
-		<div class="mb-3 sm:mb-4">
+		<div class="mb-3 sm:mb-4 flex gap-2">
 			<button
 				type="button"
-				class="w-full py-2.5 sm:py-2 px-4 bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
+				class="flex-1 py-2.5 sm:py-2 px-4 bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
 				onclick={toggleOrientation}
 			>
 				{$_('game.rotate')} ({orientation === 'horizontal' ? '↔' : '↕'})
+			</button>
+			<button
+				type="button"
+				class="flex-1 py-2.5 sm:py-2 px-4 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
+				onclick={handleRandomPlace}
+			>
+				🎲 {$_('game.random')}
 			</button>
 		</div>
 		<p class="text-xs sm:text-sm text-ocean-300 text-center">
 			{$_('game.placeNextShip', { values: { ship: $_(`ships.${selectedShipType}`) } })}
 		</p>
+	{:else if !allShipsPlaced}
+		<!-- Show random button when no ship is selected but ships remain -->
+		<div class="mb-3 sm:mb-4">
+			<button
+				type="button"
+				class="w-full py-2.5 sm:py-2 px-4 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white rounded-lg transition-colors touch-manipulation text-sm sm:text-base"
+				onclick={handleRandomPlace}
+			>
+				🎲 {$_('game.random')}
+			</button>
+		</div>
 	{/if}
 
 	<!-- Ready button -->

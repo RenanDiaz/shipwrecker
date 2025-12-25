@@ -76,13 +76,40 @@ export interface ClientGameState {
 
 // --- Messages from client to server ---
 
+// Chat message types
+export type ChatMessageType = 'preset' | 'reaction';
+
+// Preset chat message IDs
+export type PresetMessageId =
+	| 'gl'      // Good luck!
+	| 'gg'      // Good game!
+	| 'ns'      // Nice shot!
+	| 'oops'    // Oops!
+	| 'wow'     // Wow!
+	| 'hurry'   // Hurry up!
+	| 'rematch' // Rematch?
+	| 'bye';    // Goodbye!
+
+// Quick reaction emojis
+export type ReactionId = '👍' | '👏' | '😄' | '😮' | '😅' | '🔥' | '💀' | '🎯';
+
+// Chat message from a player
+export interface ChatMessage {
+	id: string;
+	from: 1 | 2;
+	messageType: ChatMessageType;
+	content: PresetMessageId | ReactionId;
+	timestamp: number;
+}
+
 export type ClientMessage =
 	| { type: 'join'; playerId: string }
 	| { type: 'placeShip'; placement: ShipPlacement }
 	| { type: 'removeShip'; shipType: ShipType }
 	| { type: 'ready' }
 	| { type: 'fire'; coord: Coord }
-	| { type: 'rematch' };
+	| { type: 'rematch' }
+	| { type: 'chat'; messageType: ChatMessageType; content: PresetMessageId | ReactionId };
 
 // --- Messages from server to client ---
 
@@ -97,7 +124,8 @@ export type ServerMessage =
 	| { type: 'turnChange'; isYourTurn: boolean }
 	| { type: 'gameOver'; winner: 'you' | 'opponent' }
 	| { type: 'rematchRequested'; byPlayer: 1 | 2 }
-	| { type: 'rematchStarted' };
+	| { type: 'rematchStarted' }
+	| { type: 'chatMessage'; message: ChatMessage };
 
 // Shot result
 export interface ShotResult {
