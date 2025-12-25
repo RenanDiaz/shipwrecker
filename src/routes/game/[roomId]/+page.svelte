@@ -10,11 +10,17 @@
 	import GameStatus from '$lib/components/GameStatus.svelte';
 	import WinnerModal from '$lib/components/WinnerModal.svelte';
 	import Chat from '$lib/components/Chat.svelte';
-	import type { Coord, Orientation, ShipType, ShipPlacement as ShipPlacementData, ChatMessageType, PresetMessageId, ReactionId } from '../../../../shared/types';
+	import type { Coord, Orientation, ShipType, ShipPlacement as ShipPlacementData, ChatMessageType, PresetMessageId, ReactionId, AIDifficulty, GameMode } from '../../../../shared/types';
 	import { TOTAL_SHIPS } from '../../../../shared/constants';
 
-	// Get room ID from URL
+	// Get room ID and URL params
 	let roomId = $derived($page.params.roomId ?? '');
+	let urlGameMode = $derived($page.url.searchParams.get('mode'));
+	let urlDifficulty = $derived($page.url.searchParams.get('difficulty'));
+
+	// Determine game mode and AI difficulty from URL
+	let gameMode = $derived<GameMode>(urlGameMode === 'single' ? 'singlePlayer' : 'multiplayer');
+	let aiDifficulty = $derived<AIDifficulty>((urlDifficulty as AIDifficulty) || 'medium');
 
 	// Local state for ship placement preview
 	let previewCoords = $state<Coord[]>([]);
@@ -29,7 +35,11 @@
 	// Connect to room on mount
 	onMount(() => {
 		if (roomId) {
-			gameStore.connect(roomId);
+			if (gameMode === 'singlePlayer') {
+				gameStore.connect(roomId, gameMode, aiDifficulty);
+			} else {
+				gameStore.connect(roomId);
+			}
 		}
 	});
 
@@ -56,6 +66,18 @@
 	let opponentBoard = $derived(gameState?.opponentBoard);
 	let allShipsPlaced = $derived((yourBoard?.ships.length ?? 0) === TOTAL_SHIPS);
 	let canFire = $derived(isYourTurn && selectedTarget !== null);
+	let isAIGame = $derived(gameState?.isAIOpponent ?? false);
+	let currentAIDifficulty = $derived(gameState?.aiDifficulty);
+
+	// Get AI difficulty display name
+	function getAIDifficultyName(difficulty: AIDifficulty | undefined): string {
+		switch (difficulty) {
+			case 'easy': return $_('game.aiEasy');
+			case 'medium': return $_('game.aiMedium');
+			case 'hard': return $_('game.aiHard');
+			default: return $_('game.aiMedium');
+		}
+	}
 
 	// Ship placement handlers
 	function handlePlaceShip(shipType: ShipType, coord: Coord, orientation: Orientation): void {
@@ -186,6 +208,7 @@
 				{lastShotResult}
 				{roomId}
 				{linkCopied}
+				{isAIGame}
 				onCopyLink={() => gameStore.copyRoomLink()}
 			/>
 		</div>
@@ -197,7 +220,7 @@
 				{#if opponentBoard}
 					<Board
 						board={opponentBoard}
-						title={$_('game.opponentBoard')}
+						title={isAIGame ? $_('game.aiOpponent', { values: { difficulty: getAIDifficultyName(currentAIDifficulty) } }) : $_('game.opponentBoard')}
 						isOpponentBoard={true}
 						isClickable={isPlayingPhase && isYourTurn}
 						previewCoords={selectedTarget ? [selectedTarget] : []}
@@ -251,8 +274,8 @@
 					/>
 				{/if}
 
-				<!-- Chat (show when opponent is connected) -->
-				{#if gameState.opponentConnected}
+				<!-- Chat (show when opponent is connected, but not for AI games) -->
+				{#if gameState.opponentConnected && !isAIGame}
 					<div class="mt-2">
 						<Chat
 							messages={chatMessages}

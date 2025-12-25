@@ -1,5 +1,5 @@
 import type * as Party from 'partykit/server';
-import type { ClientMessage, ServerMessage, GameState, ChatMessage, ChatMessageType, PresetMessageId, ReactionId } from '../shared/types';
+import type { ClientMessage, ServerMessage, GameState, ChatMessage, ChatMessageType, PresetMessageId, ReactionId, AIDifficulty, GameMode } from '../shared/types';
 import {
 	createGameState,
 	addPlayer,
@@ -9,8 +9,12 @@ import {
 	setPlayerReady,
 	fireShot,
 	resetGame,
-	getClientGameState
+	getClientGameState,
+	addAIPlayer,
+	setupAIBoard,
+	isAITurn
 } from './gameEngine';
+import { AI_PLAYER_ID, getAIMove, createAIState, updateAIState, type AIState } from './aiEngine';
 
 // Store player connections
 interface ConnectionInfo {
@@ -22,6 +26,8 @@ export default class ShipWreckerServer implements Party.Server {
 	private connections: Map<string, ConnectionInfo> = new Map();
 	private rematchRequests: Set<string> = new Set();
 	private chatMessageCounter: number = 0;
+	private aiState: AIState | null = null;
+	private aiTurnTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(readonly room: Party.Room) {
 		this.gameState = createGameState(room.id);
@@ -40,16 +46,24 @@ export default class ShipWreckerServer implements Party.Server {
 			removePlayer(this.gameState, info.playerId);
 			this.connections.delete(conn.id);
 
-			// Notify other players
-			const playerNumber =
-				this.gameState.player1?.id === info.playerId
-					? 1
-					: this.gameState.player2?.id === info.playerId
-						? 2
-						: null;
+			// Clear AI turn timeout if player disconnects
+			if (this.aiTurnTimeout) {
+				clearTimeout(this.aiTurnTimeout);
+				this.aiTurnTimeout = null;
+			}
 
-			if (playerNumber) {
-				this.broadcast({ type: 'playerLeft', playerNumber });
+			// Notify other players (but not for AI games since AI never disconnects)
+			if (this.gameState.gameMode !== 'singlePlayer') {
+				const playerNumber =
+					this.gameState.player1?.id === info.playerId
+						? 1
+						: this.gameState.player2?.id === info.playerId
+							? 2
+							: null;
+
+				if (playerNumber) {
+					this.broadcast({ type: 'playerLeft', playerNumber });
+				}
 			}
 
 			// Send updated state to remaining player
@@ -74,7 +88,7 @@ export default class ShipWreckerServer implements Party.Server {
 
 		switch (parsed.type) {
 			case 'join':
-				this.handleJoin(sender, parsed.playerId);
+				this.handleJoin(sender, parsed.playerId, parsed.gameMode, parsed.aiDifficulty);
 				break;
 			case 'placeShip':
 				this.handlePlaceShip(sender, parsed.placement);
@@ -97,7 +111,12 @@ export default class ShipWreckerServer implements Party.Server {
 		}
 	}
 
-	private handleJoin(conn: Party.Connection, playerId: string): void {
+	private handleJoin(
+		conn: Party.Connection,
+		playerId: string,
+		gameMode?: GameMode,
+		aiDifficulty?: AIDifficulty
+	): void {
 		// Check if already connected
 		const existingConn = Array.from(this.connections.entries()).find(
 			([, info]) => info.playerId === playerId
@@ -106,6 +125,12 @@ export default class ShipWreckerServer implements Party.Server {
 		if (existingConn) {
 			// Reconnection - update connection ID
 			this.connections.delete(existingConn[0]);
+		}
+
+		// If this is a new single player game, reinitialize the game state
+		if (gameMode === 'singlePlayer' && !this.gameState.player1) {
+			this.gameState = createGameState(this.room.id, 'singlePlayer', aiDifficulty);
+			this.aiState = createAIState();
 		}
 
 		const { success, playerNumber, error } = addPlayer(this.gameState, playerId);
@@ -120,6 +145,15 @@ export default class ShipWreckerServer implements Party.Server {
 
 		// Notify about join
 		this.broadcast({ type: 'playerJoined', playerNumber: playerNumber! });
+
+		// If single player mode, add AI player immediately
+		if (this.gameState.gameMode === 'singlePlayer' && !this.gameState.player2) {
+			const aiResult = addAIPlayer(this.gameState);
+			if (aiResult.success) {
+				console.log(`[${this.room.id}] AI opponent added`);
+				this.broadcast({ type: 'playerJoined', playerNumber: 2 });
+			}
+		}
 
 		// Send game state to all
 		this.broadcastGameState();
@@ -184,8 +218,21 @@ export default class ShipWreckerServer implements Party.Server {
 			return;
 		}
 
-		if (bothReady) {
-			// Game starts!
+		// In single player mode, set up AI board when human is ready
+		if (this.gameState.gameMode === 'singlePlayer' && !this.gameState.player2?.ready) {
+			const aiSetupResult = setupAIBoard(this.gameState);
+			if (!aiSetupResult.success) {
+				console.error(`[${this.room.id}] Failed to setup AI board:`, aiSetupResult.error);
+			}
+		}
+
+		// Check if both are now ready (including AI)
+		const nowBothReady = this.gameState.player1?.ready && this.gameState.player2?.ready;
+
+		if (nowBothReady && this.gameState.phase === 'setup') {
+			// Start the game
+			this.gameState.phase = 'playing';
+			this.gameState.currentTurn = this.gameState.player1!.id;
 			this.broadcast({ type: 'phaseChange', phase: 'playing' });
 		}
 
@@ -220,15 +267,17 @@ export default class ShipWreckerServer implements Party.Server {
 			result: { coord, result: result!, sunkShip, gameOver: gameOver || false }
 		});
 
-		// Notify opponent
-		const opponentConn = this.getOpponentConnection(conn.id);
-		if (opponentConn) {
-			this.sendToConnection(opponentConn, {
-				type: 'opponentShot',
-				coord,
-				result: result!,
-				sunkShip
-			});
+		// Notify opponent (only for multiplayer, AI doesn't need notifications)
+		if (this.gameState.gameMode !== 'singlePlayer') {
+			const opponentConn = this.getOpponentConnection(conn.id);
+			if (opponentConn) {
+				this.sendToConnection(opponentConn, {
+					type: 'opponentShot',
+					coord,
+					result: result!,
+					sunkShip
+				});
+			}
 		}
 
 		if (gameOver) {
@@ -247,9 +296,99 @@ export default class ShipWreckerServer implements Party.Server {
 		} else {
 			// Notify turn change
 			this.broadcastTurnChange();
+
+			// If it's now AI's turn, schedule AI move
+			if (isAITurn(this.gameState)) {
+				this.scheduleAITurn();
+			}
 		}
 
 		// Send updated state to all
+		this.broadcastGameState();
+	}
+
+	// Schedule AI turn with a delay for natural feel
+	private scheduleAITurn(): void {
+		if (this.aiTurnTimeout) {
+			clearTimeout(this.aiTurnTimeout);
+		}
+
+		// Random delay between 1-2 seconds
+		const delay = 1000 + Math.random() * 1000;
+
+		this.aiTurnTimeout = setTimeout(() => {
+			this.processAITurn();
+		}, delay);
+	}
+
+	// Process AI's turn
+	private processAITurn(): void {
+		if (!isAITurn(this.gameState) || !this.aiState) {
+			return;
+		}
+
+		// Get human player's board to shoot at
+		const humanPlayerId = this.gameState.player1?.id;
+		if (!humanPlayerId) {
+			return;
+		}
+
+		const humanBoard = this.gameState.boards[humanPlayerId];
+		if (!humanBoard) {
+			return;
+		}
+
+		// Get AI's move based on difficulty
+		const difficulty = this.gameState.aiDifficulty || 'medium';
+		const coord = getAIMove(humanBoard, difficulty, this.aiState);
+
+		// Process the shot
+		const { success, result, sunkShip, gameOver } = fireShot(
+			this.gameState,
+			AI_PLAYER_ID,
+			coord
+		);
+
+		if (!success) {
+			console.error(`[${this.room.id}] AI fire failed`);
+			return;
+		}
+
+		// Update AI state based on result
+		updateAIState(this.aiState, coord, result!, humanBoard);
+
+		// Notify human player about the shot
+		for (const [connId, connInfo] of this.connections) {
+			const c = this.room.getConnection(connId);
+			if (c && connInfo.playerId === humanPlayerId) {
+				this.sendToConnection(c, {
+					type: 'opponentShot',
+					coord,
+					result: result!,
+					sunkShip
+				});
+			}
+		}
+
+		if (gameOver) {
+			this.broadcast({ type: 'phaseChange', phase: 'finished' });
+
+			// Send game over to human player (AI won)
+			for (const [connId, connInfo] of this.connections) {
+				const c = this.room.getConnection(connId);
+				if (c) {
+					this.sendToConnection(c, {
+						type: 'gameOver',
+						winner: 'opponent'
+					});
+				}
+			}
+		} else {
+			// Notify turn change
+			this.broadcastTurnChange();
+		}
+
+		// Send updated state
 		this.broadcastGameState();
 	}
 
@@ -268,6 +407,13 @@ export default class ShipWreckerServer implements Party.Server {
 		const playerNumber =
 			this.gameState.player1?.id === info.playerId ? 1 : 2;
 		this.broadcast({ type: 'rematchRequested', byPlayer: playerNumber });
+
+		// In single player mode, AI auto-accepts rematch
+		if (this.gameState.gameMode === 'singlePlayer') {
+			this.rematchRequests.add(AI_PLAYER_ID);
+			// Reset AI state for new game
+			this.aiState = createAIState();
+		}
 
 		// Check if both requested
 		const bothRequested =
