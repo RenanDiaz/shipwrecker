@@ -2,7 +2,7 @@
 	import type { Ship, GamePhase, ShotResult } from '../../../shared/types';
 	import { _ } from 'svelte-i18n';
 	import ShipComponent from './Ship.svelte';
-	import { toggleSound, isSoundEnabled } from '$lib/utils/sounds';
+	import { toggleSound, isSoundEnabled, getVolume, setVolume, playClickSound } from '$lib/utils/sounds';
 
 	interface Props {
 		phase: GamePhase;
@@ -32,9 +32,24 @@
 
 	// Sound state
 	let soundOn = $state(isSoundEnabled());
+	let volume = $state(getVolume());
+	let showVolumeControl = $state(false);
 
 	function handleToggleSound() {
 		soundOn = toggleSound();
+		if (soundOn) {
+			playClickSound();
+		}
+	}
+
+	function handleVolumeChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		volume = parseFloat(target.value);
+		setVolume(volume);
+	}
+
+	function toggleVolumePanel() {
+		showVolumeControl = !showVolumeControl;
 	}
 
 	// Count remaining ships
@@ -52,20 +67,53 @@
 		<div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
 			<button
 				type="button"
-				class="text-xs px-2 py-1.5 sm:py-1 rounded bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white transition-colors touch-manipulation"
+				class="text-xs px-2 py-1.5 sm:py-1 rounded bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white transition-colors touch-manipulation active:scale-95"
 				onclick={onCopyLink}
 			>
 				{linkCopied ? $_('game.linkCopied') : $_('game.copyRoomLink')}
 			</button>
-			<button
-				type="button"
-				class="text-lg sm:text-xl px-2 py-1 rounded bg-navy-700 hover:bg-navy-600 active:bg-navy-800 text-white transition-colors touch-manipulation"
-				onclick={handleToggleSound}
-				aria-label={soundOn ? 'Mute sounds' : 'Unmute sounds'}
-				title={soundOn ? 'Mute sounds' : 'Unmute sounds'}
-			>
-				{soundOn ? '🔊' : '🔇'}
-			</button>
+			<!-- Sound control with volume dropdown -->
+			<div class="relative">
+				<button
+					type="button"
+					class="text-lg sm:text-xl px-2 py-1 rounded bg-navy-700 hover:bg-navy-600 active:bg-navy-800 text-white transition-colors touch-manipulation"
+					onclick={toggleVolumePanel}
+					aria-label="Sound settings"
+					title="Sound settings"
+				>
+					{soundOn ? '🔊' : '🔇'}
+				</button>
+				{#if showVolumeControl}
+					<div class="absolute right-0 top-full mt-2 bg-navy-800 rounded-lg p-3 shadow-xl border border-navy-600 z-50 min-w-[160px]">
+						<div class="flex items-center justify-between gap-3 mb-3">
+							<span class="text-xs text-gray-300">Sound</span>
+							<button
+								type="button"
+								class="px-2 py-1 text-xs rounded transition-colors"
+								class:bg-green-600={soundOn}
+								class:bg-gray-600={!soundOn}
+								onclick={handleToggleSound}
+							>
+								{soundOn ? 'ON' : 'OFF'}
+							</button>
+						</div>
+						<div class="flex items-center gap-2">
+							<span class="text-xs text-gray-400">🔈</span>
+							<input
+								type="range"
+								min="0"
+								max="1"
+								step="0.1"
+								value={volume}
+								oninput={handleVolumeChange}
+								class="flex-1 h-2 bg-navy-600 rounded-lg appearance-none cursor-pointer accent-ocean-500"
+								disabled={!soundOn}
+							/>
+							<span class="text-xs text-gray-400">🔊</span>
+						</div>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PlayerBoard, Coord, CellState } from '../../../shared/types';
 	import { BOARD_SIZE, COLUMN_LABELS, ROW_LABELS } from '../../../shared/constants';
+	import { onMount } from 'svelte';
 	import Cell from './Cell.svelte';
 
 	interface Props {
@@ -29,7 +30,17 @@
 		onCellLeave
 	}: Props = $props();
 
-	// Check if a coordinate is in the preview
+	// Animation state for board entrance
+	let boardVisible = $state(false);
+
+	onMount(() => {
+		// Trigger entrance animation
+		requestAnimationFrame(() => {
+			boardVisible = true;
+		});
+	});
+
+	// Check if a coordinate is in the preview (selected target)
 	function isPreviewCell(row: number, col: number): boolean {
 		return previewCoords.some((c) => c.row === row && c.col === col);
 	}
@@ -47,12 +58,25 @@
 	function isLastShot(row: number, col: number): boolean {
 		return lastShotCoord?.row === row && lastShotCoord?.col === col;
 	}
+
+	// Calculate stagger delay for each cell (wave effect from top-left)
+	function getCellDelay(row: number, col: number): number {
+		return (row + col) * 15; // 15ms stagger per diagonal
+	}
 </script>
 
 <div class="flex flex-col items-center w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto">
-	<h3 class="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">{title}</h3>
+	<h3 class="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2 transition-opacity duration-300"
+		class:opacity-0={!boardVisible}
+		class:opacity-100={boardVisible}
+	>{title}</h3>
 
-	<div class="bg-navy-900/50 p-1.5 sm:p-2 rounded-lg shadow-lg w-full">
+	<div class="bg-navy-900/50 p-1.5 sm:p-2 rounded-lg shadow-lg w-full transition-all duration-300"
+		class:opacity-0={!boardVisible}
+		class:opacity-100={boardVisible}
+		class:scale-95={!boardVisible}
+		class:scale-100={boardVisible}
+	>
 		<!-- Column labels -->
 		<div class="flex justify-center">
 			<div class="w-5 sm:w-6 h-5 sm:h-6 flex-shrink-0"></div>
@@ -75,6 +99,7 @@
 				{#each Array(BOARD_SIZE) as _, col}
 					{@const state = board.grid[row][col]}
 					{@const isPreview = isPreviewCell(row, col)}
+					{@const isTarget = isOpponentBoard && isPreview}
 					<Cell
 						coord={{ row, col }}
 						state={state}
@@ -83,6 +108,9 @@
 						isClickable={canClickCell(state)}
 						isLastShot={isLastShot(row, col)}
 						showShip={!isOpponentBoard}
+						{isTarget}
+						animationDelay={getCellDelay(row, col)}
+						{boardVisible}
 						onclick={onCellClick}
 						onmouseenter={onCellHover}
 						onmouseleave={onCellLeave}
