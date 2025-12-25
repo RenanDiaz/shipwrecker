@@ -40,6 +40,12 @@ export interface PlayerBoard {
 // Game phases
 export type GamePhase = 'waiting' | 'setup' | 'playing' | 'finished';
 
+// Game mode
+export type GameMode = 'multiplayer' | 'singlePlayer';
+
+// AI difficulty levels
+export type AIDifficulty = 'easy' | 'medium' | 'hard';
+
 // Player info
 export interface PlayerInfo {
 	id: string;
@@ -51,6 +57,8 @@ export interface PlayerInfo {
 export interface GameState {
 	roomId: string;
 	phase: GamePhase;
+	gameMode: GameMode;
+	aiDifficulty?: AIDifficulty;
 	player1: PlayerInfo | null;
 	player2: PlayerInfo | null;
 	currentTurn: string | null;
@@ -64,6 +72,8 @@ export interface GameState {
 export interface ClientGameState {
 	roomId: string;
 	phase: GamePhase;
+	gameMode: GameMode;
+	aiDifficulty?: AIDifficulty;
 	playerId: string;
 	playerNumber: 1 | 2;
 	isYourTurn: boolean;
@@ -71,6 +81,7 @@ export interface ClientGameState {
 	opponentBoard: PlayerBoard; // ships hidden, only hits/misses shown
 	opponentReady: boolean;
 	opponentConnected: boolean;
+	isAIOpponent: boolean;
 	winner: 'you' | 'opponent' | null;
 }
 
@@ -103,7 +114,7 @@ export interface ChatMessage {
 }
 
 export type ClientMessage =
-	| { type: 'join'; playerId: string }
+	| { type: 'join'; playerId: string; gameMode?: GameMode; aiDifficulty?: AIDifficulty }
 	| { type: 'placeShip'; placement: ShipPlacement }
 	| { type: 'removeShip'; shipType: ShipType }
 	| { type: 'ready' }

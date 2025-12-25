@@ -14,6 +14,7 @@
 		lastShotResult: ShotResult | null;
 		roomId: string;
 		linkCopied: boolean;
+		isAIGame?: boolean;
 		onCopyLink: () => void;
 	}
 
@@ -27,6 +28,7 @@
 		lastShotResult,
 		roomId,
 		linkCopied,
+		isAIGame = false,
 		onCopyLink
 	}: Props = $props();
 
@@ -65,13 +67,15 @@
 			<code class="bg-navy-900 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-ocean-300 font-mono text-xs sm:text-sm truncate">{roomId}</code>
 		</div>
 		<div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-			<button
-				type="button"
-				class="text-xs px-2 py-1.5 sm:py-1 rounded bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white transition-colors touch-manipulation active:scale-95"
-				onclick={onCopyLink}
-			>
-				{linkCopied ? $_('game.linkCopied') : $_('game.copyRoomLink')}
-			</button>
+			{#if !isAIGame}
+				<button
+					type="button"
+					class="text-xs px-2 py-1.5 sm:py-1 rounded bg-ocean-600 hover:bg-ocean-500 active:bg-ocean-700 text-white transition-colors touch-manipulation active:scale-95"
+					onclick={onCopyLink}
+				>
+					{linkCopied ? $_('game.linkCopied') : $_('game.copyRoomLink')}
+				</button>
+			{/if}
 			<!-- Sound control with volume dropdown -->
 			<div class="relative">
 				<button
@@ -117,21 +121,23 @@
 		</div>
 	</div>
 
-	<!-- Connection status -->
-	{#if phase === 'waiting'}
-		<div class="text-center py-3 sm:py-4">
-			<div class="animate-pulse text-yellow-400 text-sm sm:text-base">
-				{$_('game.waitingForOpponent')}
+	<!-- Connection status (only for multiplayer) -->
+	{#if !isAIGame}
+		{#if phase === 'waiting'}
+			<div class="text-center py-3 sm:py-4">
+				<div class="animate-pulse text-yellow-400 text-sm sm:text-base">
+					{$_('game.waitingForOpponent')}
+				</div>
 			</div>
-		</div>
-	{:else if !opponentConnected}
-		<div class="text-center py-1.5 sm:py-2">
-			<span class="text-red-400 text-sm">{$_('game.opponentDisconnected')}</span>
-		</div>
+		{:else if !opponentConnected}
+			<div class="text-center py-1.5 sm:py-2">
+				<span class="text-red-400 text-sm">{$_('game.opponentDisconnected')}</span>
+			</div>
+		{/if}
 	{/if}
 
 	<!-- Setup phase status -->
-	{#if phase === 'setup'}
+	{#if phase === 'setup' && !isAIGame}
 		<div class="text-xs sm:text-sm">
 			{#if opponentReady}
 				<span class="text-green-400">{$_('game.waitingForReady')}</span>

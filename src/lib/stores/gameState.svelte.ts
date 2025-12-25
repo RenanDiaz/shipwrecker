@@ -11,7 +11,9 @@ import type {
 	ChatMessage,
 	ChatMessageType,
 	PresetMessageId,
-	ReactionId
+	ReactionId,
+	GameMode,
+	AIDifficulty
 } from '../../../shared/types';
 import { generatePlayerId } from '../../../shared/constants';
 import {
@@ -55,11 +57,19 @@ function createGameStore() {
 		initializeSounds();
 	}
 
+	// Store current game mode for reconnection
+	let currentGameMode: GameMode | undefined = $state(undefined);
+	let currentAIDifficulty: AIDifficulty | undefined = $state(undefined);
+
 	// Connect to a room
-	function connect(roomId: string): void {
+	function connect(roomId: string, gameMode?: GameMode, aiDifficulty?: AIDifficulty): void {
 		if (socket) {
 			socket.close();
 		}
+
+		// Store for potential reconnection
+		currentGameMode = gameMode;
+		currentAIDifficulty = aiDifficulty;
 
 		connectionState = { connected: false, error: null };
 
@@ -74,8 +84,8 @@ function createGameStore() {
 
 		socket.addEventListener('open', () => {
 			connectionState = { connected: true, error: null };
-			// Join the room
-			sendMessage({ type: 'join', playerId });
+			// Join the room with game mode
+			sendMessage({ type: 'join', playerId, gameMode, aiDifficulty });
 		});
 
 		socket.addEventListener('message', (event) => {

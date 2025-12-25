@@ -5,7 +5,9 @@ import type {
 	Coord,
 	Ship,
 	ClientGameState,
-	ShipType
+	ShipType,
+	GameMode,
+	AIDifficulty
 } from '../shared/types';
 import { SHIP_CONFIGS, TOTAL_SHIPS } from '../shared/constants';
 import {
@@ -14,18 +16,80 @@ import {
 	processShot,
 	createOpponentView
 } from '../shared/validation';
+import { AI_PLAYER_ID, generateAIShipPlacements } from './aiEngine';
 
 // Create initial game state
-export function createGameState(roomId: string): GameState {
+export function createGameState(
+	roomId: string,
+	gameMode: GameMode = 'multiplayer',
+	aiDifficulty?: AIDifficulty
+): GameState {
 	return {
 		roomId,
 		phase: 'waiting',
+		gameMode,
+		aiDifficulty,
 		player1: null,
 		player2: null,
 		currentTurn: null,
 		winner: null,
 		boards: {}
 	};
+}
+
+// Add AI player to the game
+export function addAIPlayer(state: GameState): { success: boolean; error?: string } {
+	if (state.gameMode !== 'singlePlayer') {
+		return { success: false, error: 'Not a single player game' };
+	}
+
+	if (state.player2) {
+		return { success: false, error: 'AI already added' };
+	}
+
+	// Create AI as player 2
+	state.player2 = { id: AI_PLAYER_ID, ready: false, connected: true };
+	state.boards[AI_PLAYER_ID] = createEmptyBoard();
+	state.phase = 'setup';
+
+	return { success: true };
+}
+
+// Place AI ships and mark AI as ready
+export function setupAIBoard(state: GameState): { success: boolean; error?: string } {
+	if (state.gameMode !== 'singlePlayer') {
+		return { success: false, error: 'Not a single player game' };
+	}
+
+	if (!state.player2 || state.player2.id !== AI_PLAYER_ID) {
+		return { success: false, error: 'AI player not found' };
+	}
+
+	// Generate random ship placements for AI
+	const placements = generateAIShipPlacements();
+
+	// Place each ship
+	for (const placement of placements) {
+		const result = placeShip(state, AI_PLAYER_ID, placement);
+		if (!result.success) {
+			console.error(`Failed to place AI ship ${placement.shipType}:`, result.error);
+			return { success: false, error: result.error };
+		}
+	}
+
+	// Mark AI as ready
+	state.player2.ready = true;
+
+	return { success: true };
+}
+
+// Check if it's AI's turn
+export function isAITurn(state: GameState): boolean {
+	return (
+		state.gameMode === 'singlePlayer' &&
+		state.phase === 'playing' &&
+		state.currentTurn === AI_PLAYER_ID
+	);
 }
 
 // Add a player to the game
@@ -270,6 +334,7 @@ export function getClientGameState(
 	const playerNumber = isPlayer1 ? 1 : 2;
 	const player = isPlayer1 ? state.player1 : state.player2;
 	const opponent = isPlayer1 ? state.player2 : state.player1;
+	const isAIOpponent = opponent?.id === AI_PLAYER_ID;
 
 	const yourBoard = state.boards[playerId] || createEmptyBoard();
 	const opponentId = opponent?.id;
@@ -280,6 +345,8 @@ export function getClientGameState(
 	return {
 		roomId: state.roomId,
 		phase: state.phase,
+		gameMode: state.gameMode,
+		aiDifficulty: state.aiDifficulty,
 		playerId,
 		playerNumber,
 		isYourTurn: state.currentTurn === playerId,
@@ -287,6 +354,7 @@ export function getClientGameState(
 		opponentBoard,
 		opponentReady: opponent?.ready || false,
 		opponentConnected: opponent?.connected || false,
+		isAIOpponent,
 		winner:
 			state.winner === null
 				? null

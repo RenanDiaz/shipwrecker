@@ -2,13 +2,20 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { generateRoomId } from '../../shared/constants';
+	import type { AIDifficulty } from '../../shared/types';
 
 	let joinRoomId = $state('');
 	let joinError = $state('');
+	let selectedDifficulty = $state<AIDifficulty>('medium');
 
 	function createGame(): void {
 		const roomId = generateRoomId();
 		goto(`/game/${roomId}`);
+	}
+
+	function startSinglePlayer(): void {
+		const roomId = generateRoomId();
+		goto(`/game/${roomId}?mode=single&difficulty=${selectedDifficulty}`);
 	}
 
 	function joinGame(): void {
@@ -43,7 +50,47 @@
 		</p>
 	</div>
 
-	<!-- Game actions -->
+	<!-- Single Player -->
+	<div class="bg-navy-800/50 rounded-xl p-4 sm:p-6 border border-navy-700/50 mb-6">
+		<h2 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">{$_('landing.singlePlayer')}</h2>
+		<p class="text-gray-400 mb-3 sm:mb-4 text-sm">
+			{$_('landing.singlePlayerDescription')}
+		</p>
+		<div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+			<div class="flex gap-2 flex-1">
+				<button
+					type="button"
+					class="flex-1 py-2 px-3 rounded-lg font-medium transition-colors text-sm {selectedDifficulty === 'easy' ? 'bg-green-600 text-white' : 'bg-navy-700 text-gray-300 hover:bg-navy-600'}"
+					onclick={() => selectedDifficulty = 'easy'}
+				>
+					{$_('landing.easy')}
+				</button>
+				<button
+					type="button"
+					class="flex-1 py-2 px-3 rounded-lg font-medium transition-colors text-sm {selectedDifficulty === 'medium' ? 'bg-yellow-600 text-white' : 'bg-navy-700 text-gray-300 hover:bg-navy-600'}"
+					onclick={() => selectedDifficulty = 'medium'}
+				>
+					{$_('landing.medium')}
+				</button>
+				<button
+					type="button"
+					class="flex-1 py-2 px-3 rounded-lg font-medium transition-colors text-sm {selectedDifficulty === 'hard' ? 'bg-red-600 text-white' : 'bg-navy-700 text-gray-300 hover:bg-navy-600'}"
+					onclick={() => selectedDifficulty = 'hard'}
+				>
+					{$_('landing.hard')}
+				</button>
+			</div>
+			<button
+				type="button"
+				class="py-3 px-6 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition-colors whitespace-nowrap"
+				onclick={startSinglePlayer}
+			>
+				{$_('landing.playVsAI')}
+			</button>
+		</div>
+	</div>
+
+	<!-- Multiplayer Game actions -->
 	<div class="grid md:grid-cols-2 gap-6 mb-12">
 		<!-- Create game -->
 		<div class="bg-navy-800/50 rounded-xl p-4 sm:p-6 border border-navy-700/50 min-w-0">
