@@ -29,21 +29,21 @@
 
 {#if ready}
 	<div class="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-ocean-950">
-		<!-- Header -->
-		<header class="p-4 flex items-center justify-between border-b border-navy-700/50">
+		<!-- Header with safe area padding for iOS notch -->
+		<header class="px-4 pb-4 flex items-center justify-between border-b border-navy-700/50" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right));">
 			<a href="/" class="text-2xl font-bold text-white hover:text-ocean-300 transition-colors">
 				⚓ {$_('app.title')}
 			</a>
 			<LanguageSelector />
 		</header>
 
-		<!-- Main content -->
-		<main class="container mx-auto px-4 py-8">
+		<!-- Main content with safe area padding -->
+		<main class="container mx-auto px-4 py-8" style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(2rem, env(safe-area-inset-bottom));">
 			{@render children()}
 		</main>
 	</div>
 {:else}
-	<div class="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-ocean-950 flex items-center justify-center">
+	<div class="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-ocean-950 flex items-center justify-center" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
 		<div class="text-white text-xl animate-pulse">Loading...</div>
 	</div>
 {/if}
