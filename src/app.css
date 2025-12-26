@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Safari status bar and address bar color matching */
+html {
+	background-color: #001040; /* navy-950 */
+}
+
 :root {
 	--color-hit: #dc2626;
 	--color-miss: #e5e7eb;

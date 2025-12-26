@@ -1,10 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background-color: #001040;">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="description" content="ShipWrecker - A multiplayer naval combat game" />
+		<!-- iOS Safari status bar and address bar theming -->
+		<meta name="theme-color" content="#001040" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#001040" media="(prefers-color-scheme: dark)" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
